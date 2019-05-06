@@ -7,6 +7,7 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 from skimage.transform import resize
 from skimage.color import rgb2gray
 from atari_environment import AtariEnvironment
+from atari_environment import MountainCarDiscrete 
 import threading
 import tensorflow as tf
 import sys
@@ -24,9 +25,9 @@ flags.DEFINE_string('experiment', 'dqn_breakout', 'Name of the current experimen
 flags.DEFINE_string('game', 'Breakout-v0', 'Name of the atari game to play. Full list here: https://gym.openai.com/envs#atari')
 flags.DEFINE_integer('num_concurrent', 8, 'Number of concurrent actor-learner threads to use during training.')
 flags.DEFINE_integer('tmax', 80000000, 'Number of training timesteps.')
-flags.DEFINE_integer('resized_width', 84, 'Scale screen to this width.')
-flags.DEFINE_integer('resized_height', 84, 'Scale screen to this height.')
-flags.DEFINE_integer('agent_history_length', 4, 'Use this number of recent screens as the environment state.')
+flags.DEFINE_integer('resized_width', 1024, 'Scale screen to this width.')
+flags.DEFINE_integer('resized_height', 1, 'Scale screen to this height.')
+flags.DEFINE_integer('agent_history_length', 1, 'Use this number of recent screens as the environment state.')
 flags.DEFINE_integer('network_update_frequency', 32, 'Frequency with which each actor learner thread does an async gradient update')
 flags.DEFINE_integer('target_network_update_frequency', 10000, 'Reset the target network every n timesteps')
 flags.DEFINE_float('learning_rate', 0.0001, 'Initial learning rate.')
@@ -78,7 +79,9 @@ def actor_learner_thread(thread_id, env, session, graph_ops, num_actions, summar
     summary_placeholders, update_ops, summary_op = summary_ops
 
     # Wrap env with AtariEnvironment helper class
-    env = AtariEnvironment(gym_env=env, resized_width=FLAGS.resized_width, resized_height=FLAGS.resized_height, agent_history_length=FLAGS.agent_history_length)
+    # env = AtariEnvironment(gym_env=env, resized_width=FLAGS.resized_width, resized_height=FLAGS.resized_height, agent_history_length=FLAGS.agent_history_length)
+
+    env = MountainCarDiscrete(env)
 
     # Initialize network gradients
     s_batch = []
@@ -95,7 +98,8 @@ def actor_learner_thread(thread_id, env, session, graph_ops, num_actions, summar
     t = 0
     while T < TMAX:
         # Get initial game observation
-        s_t = env.get_initial_state()
+        # s_t = env.get_initial_state()
+        s_t = env.reset()
         terminal = False
 
         # Set up per-episode counters

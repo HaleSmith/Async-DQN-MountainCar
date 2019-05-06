@@ -1,8 +1,35 @@
+import gym
+from gym.spaces.box import Box
 import tensorflow as tf
 from skimage.transform import resize
 from skimage.color import rgb2gray
 import numpy as np
 from collections import deque
+
+class MountainCarDiscrete(gym.ObservationWrapper):
+    def __init__(self, env=None):
+        super(MountainCarDiscrete, self).__init__(env)
+        self.observation_space_orig = self.observation_space
+        self.bins = [np.linspace(self.observation_space.low[i],
+                                 self.observation_space.high[i],
+                                 32) for i in [0,1]]
+        self.observation_space = Box(0.0, 1.0, [1, 32,32])
+    
+    def observation(self, observation):
+        """
+            Return discretized observation.
+            32x32 grid with a 1 at the observation.
+        """
+        coord = []
+        for obs, bins in zip(observation, self.bins):
+            ind = np.digitize(obs, bins)
+            coord.append(ind)
+
+        x = np.zeros((32, 32), dtype=np.float32)
+        x[coord] = 1.0
+        x = x.flatten()
+        x = np.array(x)
+        return x
 
 class AtariEnvironment(object):
     """

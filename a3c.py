@@ -104,7 +104,7 @@ def actor_learner_thread(num, env, session, graph_ops, summary_ops, saver):
             a_t[action_index] = 1
 
             if probs_summary_t % 100 == 0:
-                print "P, ", np.max(probs), "V ", session.run(v_network, feed_dict={s: [s_t]})[0][0]
+                print("P, ", np.max(probs), "V ", session.run(v_network, feed_dict={s: [s_t]})[0][0])
 
             s_batch.append(s_t)
             a_batch.append(a_t)
@@ -128,7 +128,7 @@ def actor_learner_thread(num, env, session, graph_ops, summary_ops, saver):
             R_t = session.run(v_network, feed_dict={s: [s_t]})[0][0] # Bootstrap from last state
 
         R_batch = np.zeros(t)
-        for i in reversed(range(t_start, t)):
+        for i in reversed(list(range(t_start, t))):
             R_t = past_rewards[i] + GAMMA * R_t
             R_batch[i] = R_t
 
@@ -143,7 +143,7 @@ def actor_learner_thread(num, env, session, graph_ops, summary_ops, saver):
         if terminal:
             # Episode ended, collect stats and reset game
             session.run(update_ep_reward, feed_dict={r_summary_placeholder: ep_reward})
-            print "THREAD:", num, "/ TIME", T, "/ REWARD", ep_reward
+            print("THREAD:", num, "/ TIME", T, "/ REWARD", ep_reward)
             s_t = env.get_initial_state()
             terminal = False
             # Reset per-episode counters
@@ -214,7 +214,7 @@ def train(session, graph_ops, saver):
 
 def evaluation(session, graph_ops, saver):
     saver.restore(session, CHECKPOINT_NAME)
-    print "Restored model weights from ", CHECKPOINT_NAME
+    print("Restored model weights from ", CHECKPOINT_NAME)
     monitor_env = gym.make(GAME)
     monitor_env.monitor.start('/tmp/'+EXPERIMENT_NAME+"/eval")
 
@@ -224,7 +224,7 @@ def evaluation(session, graph_ops, saver):
     # Wrap env with AtariEnvironment helper class
     env = AtariEnvironment(gym_env=monitor_env, resized_width=RESIZED_WIDTH, resized_height=RESIZED_HEIGHT, agent_history_length=AGENT_HISTORY_LENGTH)
 
-    for i_episode in xrange(100):
+    for i_episode in range(100):
         s_t = env.get_initial_state()
         ep_reward = 0
         terminal = False
@@ -236,7 +236,7 @@ def evaluation(session, graph_ops, saver):
             s_t1, r_t, terminal, info = env.step(action_index)
             s_t = s_t1
             ep_reward += r_t
-        print ep_reward
+        print(ep_reward)
     monitor_env.monitor.close()
 
 def main(_):
