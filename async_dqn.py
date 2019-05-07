@@ -23,8 +23,8 @@ flags = tf.app.flags
 
 flags.DEFINE_string('experiment', 'dqn_breakout', 'Name of the current experiment')
 flags.DEFINE_string('game', 'Breakout-v0', 'Name of the atari game to play. Full list here: https://gym.openai.com/envs#atari')
-flags.DEFINE_integer('num_concurrent', 8, 'Number of concurrent actor-learner threads to use during training.')
-flags.DEFINE_integer('tmax', 80000000, 'Number of training timesteps.')
+flags.DEFINE_integer('num_concurrent', 1, 'Number of concurrent actor-learner threads to use during training.')
+flags.DEFINE_integer('tmax', 8000000, 'Number of training timesteps.')
 flags.DEFINE_integer('resized_width', 1024, 'Scale screen to this width.')
 flags.DEFINE_integer('resized_height', 1, 'Scale screen to this height.')
 flags.DEFINE_integer('agent_history_length', 1, 'Use this number of recent screens as the environment state.')
@@ -171,7 +171,7 @@ def actor_learner_thread(thread_id, env, session, graph_ops, num_actions, summar
                 stats = [ep_reward, episode_ave_max_q/float(ep_t), epsilon]
                 for i in range(len(stats)):
                     session.run(update_ops[i], feed_dict={summary_placeholders[i]:float(stats[i])})
-                print("THREAD:", thread_id, "/ TIME", T, "/ TIMESTEP", t, "/ EPSILON", epsilon, "/ REWARD", ep_reward, "/ Q_MAX %.4f" % (episode_ave_max_q/float(ep_t)), "/ EPSILON PROGRESS", t/float(FLAGS.anneal_epsilon_timesteps))
+                print(">> THREAD:", thread_id, "/ TIME", T, "/ TIMESTEP", t, "/ EPSILON", epsilon, "/ REWARD", ep_reward, "/ Q_MAX %.4f" % (episode_ave_max_q/float(ep_t)), "/ EPSILON PROGRESS", t/float(FLAGS.anneal_epsilon_timesteps))
                 break
 
 def build_graph(num_actions):
@@ -318,6 +318,7 @@ def main(_):
         evaluation(session, graph_ops, saver)
     else:
         train(session, graph_ops, num_actions, saver)
+        print("DONE FOR REAL")
 
 if __name__ == "__main__":
   tf.app.run()
