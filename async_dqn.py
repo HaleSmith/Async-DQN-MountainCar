@@ -24,7 +24,7 @@ flags = tf.app.flags
 flags.DEFINE_string('experiment', 'dqn_breakout', 'Name of the current experiment')
 flags.DEFINE_string('game', 'Breakout-v0', 'Name of the atari game to play. Full list here: https://gym.openai.com/envs#atari')
 flags.DEFINE_integer('num_concurrent', 1, 'Number of concurrent actor-learner threads to use during training.')
-flags.DEFINE_integer('tmax', 8000000, 'Number of training timesteps.')
+flags.DEFINE_integer('tmax', 300000, 'Number of training timesteps.')
 flags.DEFINE_integer('resized_width', 1024, 'Scale screen to this width.')
 flags.DEFINE_integer('resized_height', 1, 'Scale screen to this height.')
 flags.DEFINE_integer('agent_history_length', 1, 'Use this number of recent screens as the environment state.')
@@ -263,6 +263,8 @@ def train(session, graph_ops, num_actions, saver):
         for t in actor_learner_threads:
             t.start()
 
+    return
+    print("FINISHED THREADS")
     # Show the agents training and write summary statistics
     last_summary_time = 0
     while True:
